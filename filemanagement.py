@@ -1,46 +1,57 @@
-import urllib.request
+# import urllib.request
+import urllib
 import zipfile
 import os
 import json
 
 def download_data(url, filename):
-        urllib.request.urlretrieve(url, filename)
+        urllib.urlretrieve(url, filename)
         print("Data Downloaded")
 
 def unzip_directories():
+    # zip_ref = zipfile.ZipFile("HOOPS.zip", 'r')
+    zip_ref = zipfile.ZipFile("HOOPS.zip", 'r')
+    zip_ref.extractall('./')
+    zip_ref.close()
 
-    directory = os.fsencode('./')
-    for file in os.listdir(directory):
-        filename = os.fsdecode(file)
-        if filename.endswith(".zip"):
-            zip_ref = zipfile.ZipFile(filename, 'r')
-            if filename.startswith("TDP"):
-                zip_ref.extractall('./TDPdata')
-            else:
-                zip_ref.extractall('./')
-            zip_ref.close()
-            continue
-        else:
-            continue
+    zip_ref = zipfile.ZipFile("ModuleDLL.zip", 'r')
+    zip_ref.extractall('./')
+    zip_ref.close()
 
-def upload_report(output_file):
+def get_credentials():
+    local_directory = os.getcwd()
+    local_directory = local_directory + "\\"
+
+    creds = {}
+    with open(local_directory+"credentials.json") as json_data:
+        d = json.load(json_data)
+        creds["access_key"] = d['accessKeyId']
+        creds["secret_key"] = d['secretAccessKey']
+    return creds
+
+def upload_report(output_file, creds):
+
     import time
     timestamp = int(time.time())
 
-    with open('credentials.json') as json_data:
-        d = json.load(json_data)
-        access_key = d['accessKeyId']
-        secret_key = d['secretAccessKey']
+    # save local dir
+    # local_directory = os.getcwd()
+    # local_directory = local_directory + "\\"
+
+    # with open(local_directory+"credentials.json") as json_data:
+    #     d = json.load(json_data)
+    #     access_key = d['accessKeyId']
+    #     secret_key = d['secretAccessKey']
 
     from boto.s3.connection import S3Connection
-    conn = S3Connection(access_key, secret_key)
+    conn = S3Connection(creds["access_key"], creds["secret_key"])
 
     # NEED NEW BUCKET
     bucket = conn.get_bucket('151602')
 
     from boto.s3.key import Key
     k = Key(bucket)
-    file_name = str(timestamp)+'output.dmi'
+    file_name = str(timestamp)+'report.pdf'
     k.key = file_name
     k.set_contents_from_filename(output_file)
 

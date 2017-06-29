@@ -1,5 +1,6 @@
 import os
 import ctypes
+import shutil
 
 # save local dir
 local_directory = os.getcwd()
@@ -20,6 +21,13 @@ with open('in.txt') as f:
 # download the input file to the local dir
 import filemanagement
 filemanagement.download_data(inputs["inputFile"], "input.stp")
+shutil.copyfile("C:\\HOOPS.zip", local_directory+"HOOPS.zip")
+filemanagement.unzip_directories()
+creds = filemanagement.get_credentials()
+print "Got S3 creds....\n"
+
+target = open("out.txt", 'w')
+print "Open out.txt"
 
 #os.chdir("C:\\scratch\\dmc\\ana\\Jun16-PDF-API-release")
 print "Loading Create3DPdf DLL....\n"
@@ -62,12 +70,13 @@ result = convDll.create3DPDF(infile, outfile)
 print result
 print "... success!\n"
 
-final_name = filemanagement.upload_report(outfile)
+# os.system('C:\Python27\python upload.py')
+
+final_name = filemanagement.upload_report(outfile, creds)
 
 outputs = "outputFile="+final_name
 outputs += "\noutputTemplate=<div class=\"project-run-services padding-10\" ng-if=\"!runHistory\" layout=\"column\">          <style>            #custom-dome-UI {             margin-top: -30px;           }          </style>            <div id=\"custom-dome-UI\">             <div layout=\"row\" layout-wrap style=\"padding: 0px 30px\">               <h2>Report Created Successfully:</h2>               <p><a href=\"{{outputFile}}\">{{outputFile}}</a></p>             </div>           </div>        </div>   <script> </script>"
 
-target = open("out.txt", 'w')
 target.write(outputs)
 target.close
 
