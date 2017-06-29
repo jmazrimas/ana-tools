@@ -2,3 +2,6 @@ HOOPS
 ModuleDLL
 test*
 Readme.pdf
+*.zip
+credentials.json
+*.pyc
